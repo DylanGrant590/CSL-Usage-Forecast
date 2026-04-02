@@ -1,163 +1,120 @@
-## 📊 CSL Computer Lab — Forecasting Pipeline
+# CSL Computer Lab — Forecasting Pipeline
 
-This project develops a **modular forecasting system** to predict daily student usage of the Commuting Students’ Lounge (CSL) Computer Lab at UWI Mona.
+This project presents a modular forecasting pipeline developed in R to estimate daily usage of the CSL Computer Lab over an academic semester. The pipeline integrates multiple quantitative methods to produce reliable forecasts and capture uncertainty in future demand.
 
-It combines multiple statistical and simulation-based approaches to generate reliable projections and evaluate uncertainty.
+Rather than relying on a single model or predefined target, this approach emphasizes data-driven estimation using historical visit patterns.
 
----
+## Objective
 
-## 🚀 Overview
+The primary objective of this project is to forecast total lab visits over a semester by:
 
-The pipeline integrates three forecasting techniques:
+* Modeling historical visit data
+* Predicting future daily usage
+* Comparing outputs from different forecasting techniques
+* Quantifying uncertainty in projected totals
 
-* **ARIMA (Time Series Model)** – captures trends and seasonality
-* **Linear Regression** – models usage based on time and weekday patterns
-* **Monte Carlo Simulation** – estimates variability and probability outcomes
+## Methodology
 
-Together, these models provide both **point forecasts** and **risk-based insights**.
+The pipeline applies three complementary modeling approaches:
 
----
+### 1. ARIMA (Time Series Modeling)
 
-## 🧠 Key Features
+The ARIMA model treats the data as a time series and captures temporal dependencies such as trends and short-term fluctuations. The model is automatically selected using `auto.arima()` and generates forecasts with confidence intervals.
 
-* Modular, reusable functions for each model
-* Multi-model comparison for robustness
-* Semester-aware forecasting (excludes weekends)
-* Probabilistic analysis of target outcomes
-* Clean visualization using `ggplot2`
+### 2. Linear Regression (Deterministic Trends)
 
----
+A multiple linear regression model is used to explain variation in visits based on:
 
-## 📁 Project Structure
+* Sequential time trend (day number)
+* Week of the year
+* Day-of-week indicators (Monday to Thursday)
 
-```
-forecast_pipeline.R
-│
-├── Data Preparation
-│   ├── load_data()
-│   └── get_semester_calendar()
-│
-├── Models
-│   ├── run_arima()
-│   ├── run_regression()
-│   └── run_monte_carlo()
-│
-├── Visualization
-│   ├── plot_arima()
-│   └── plot_monte_carlo()
-│
-└── Main Pipeline
-    └── run_pipeline()
-```
+This approach captures systematic patterns in lab usage, particularly recurring weekday effects.
 
----
+### 3. Monte Carlo Simulation (Stochastic Forecasting)
 
-## 📌 Data Description
+Monte Carlo simulation is used to model uncertainty by generating a large number of possible future scenarios. Simulated values are based on the historical mean and standard deviation of visits, with variability scaled to reduce extreme outcomes.
 
-The dataset consists of **daily computer lab visits** recorded over:
+The simulation produces a distribution of total visits, summarized using:
 
-* January – March 2026
-* Weekdays only (academic schedule)
+* Mean
+* Median
+* Percentile range (10th to 90th)
 
-Additional engineered features include:
+## Project Structure
 
-* `day_num` – sequential day index
-* `week_num` – calendar week
-* `weekday dummies` – captures day-specific effects
+* `load_data()`
+  Loads and consolidates observed visit data for January to March.
 
----
+* `get_semester_calendar()`
+  Generates all working days within the semester, excluding weekends.
 
-## ⚙️ Models Used
+* `run_arima()`
+  Fits and forecasts using the ARIMA model.
 
-### 1. ARIMA Model
+* `run_regression()`
+  Fits a regression model and predicts future visits.
 
-* Automatically selected using `auto.arima()`
-* Accounts for time-series structure and seasonality
-* Produces forecast intervals (80% and 95%)
+* `run_monte_carlo()`
+  Simulates future outcomes to estimate uncertainty.
 
----
+* `run_pipeline()`
+  Executes the full workflow and outputs model summaries.
 
-### 2. Linear Regression
+## How to Run
 
-Predictors:
+1. Install required packages:
 
-* Time trend (`day_num`)
-* Weekly pattern (`week_num`)
-* Day-of-week effects (Mon–Thu dummies)
+   ```r
+   install.packages(c("forecast", "ggplot2", "tseries", "openxlsx"))
+   ```
 
-Used to capture **systematic patterns in lab usage**.
+2. Run the script:
 
----
+   ```r
+   source("your_script_name.R")
+   ```
 
-### 3. Monte Carlo Simulation
+3. Execute the pipeline:
 
-* Generates **50,000 simulated scenarios**
-* Based on historical mean and variance
-* Outputs:
+   ```r
+   results <- run_pipeline()
+   ```
 
-  * Expected total usage
-  * Distribution (P10, Median, P90)
-  * Probability of hitting a target (e.g., 2445 visits)
+## Output
 
----
+The pipeline provides:
 
-## 📈 Example Output
+* Total observed visits to date
+* Number of remaining working days
+* Forecasted total visits from:
 
-```
-Observed visits: XXXX
-Remaining days: XX
+  * ARIMA model
+  * Linear regression model
+  * Monte Carlo simulation (mean, median, and percentile range)
 
-MODEL SUMMARY
-ARIMA: XXXX
-LM   : XXXX
-MC   : XXXX (P≥2445: XX.X%)
-```
+All results are also returned as a structured list for further analysis or visualization.
 
----
+## Assumptions
 
-## 📊 Visualization
+* Lab usage follows patterns observable in historical data.
+* Weekends are excluded from the forecasting horizon.
+* Day-of-week effects are consistent over time.
+* Simulated future visits follow a normal distribution with reduced variance.
 
-* ARIMA forecast plotted with historical data
-* Monte Carlo results can be extended to histograms
+## Limitations
 
----
+* The dataset is relatively small, which may limit model accuracy.
+* External factors (e.g., exams, holidays, system outages) are not explicitly included.
+* The regression model assumes linear relationships and may not capture complex dynamics.
+* Monte Carlo simulations rely on distributional assumptions that may not fully reflect real-world variability.
 
-## 🛠️ Installation & Usage
+## Future Improvements
 
-### Requirements
+* Incorporate academic calendar events (e.g., exams, breaks)
+* Develop an ensemble model combining all forecasts
+* Add diagnostic plots and performance evaluation metrics
+* Automate export of results to Excel or dashboards
+* Extend the dataset to improve model robustness
 
-```r
-install.packages(c("forecast", "ggplot2", "tseries", "openxlsx"))
-```
-
-### Run the Pipeline
-
-```r
-source("forecast_pipeline.R")
-results <- run_pipeline()
-```
-
----
-
-## 🎯 Applications
-
-* Lab resource planning
-* Staff scheduling
-* Capacity management
-* Data-driven decision making in academic environments
-
----
-
-## 📌 Future Improvements
-
-* Add external factors (exams, deadlines, holidays)
-* Implement machine learning models (e.g., Random Forest, XGBoost)
-* Improve Monte Carlo assumptions (non-normal distributions)
-* Deploy as a dashboard (Shiny app)
-
----
-
-## 👤 Author
-
-**Dylan Grant**
-🔗 GitHub: [https://github.com/DylanGrant590](https://github.com/DylanGrant590)
+This project demonstrates how combining statistical models with simulation techniques can provide a more comprehensive understanding of future outcomes, especially in settings with uncertainty and limited data.
