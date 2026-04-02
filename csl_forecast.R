@@ -112,10 +112,10 @@ run_regression <- function(data, future_dates) {
 }
 
 ## ────────────────────────────────────────────────────────────
-## 4. MONTE CARLO SIMULATION
+## 4. MONTE CARLO SIMULATION (NO TARGET)
 ## ────────────────────────────────────────────────────────────
 
-run_monte_carlo <- function(data, future_dates, n_sim = 50000, target = 2445) {
+run_monte_carlo <- function(data, future_dates, n_sim = 50000) {
 
   mean_vis <- mean(data$visits)
   sd_vis   <- sd(data$visits)
@@ -126,11 +126,10 @@ run_monte_carlo <- function(data, future_dates, n_sim = 50000, target = 2445) {
   })
 
   list(
-    mean = mean(sim_totals),
+    mean   = mean(sim_totals),
     median = median(sim_totals),
-    p10 = quantile(sim_totals, 0.10),
-    p90 = quantile(sim_totals, 0.90),
-    prob_target = mean(sim_totals >= target)
+    p10    = quantile(sim_totals, 0.10),
+    p90    = quantile(sim_totals, 0.90)
   )
 }
 
@@ -153,7 +152,6 @@ plot_arima <- function(data, future_dates, arima_fc) {
 }
 
 plot_monte_carlo <- function(sim_results) {
-  # Placeholder (you can expand with full histogram if needed)
   print(sim_results)
 }
 
@@ -179,8 +177,9 @@ run_pipeline <- function() {
   cat("MODEL SUMMARY\n")
   cat(sprintf("ARIMA: %.0f\n", arima$total))
   cat(sprintf("LM   : %.0f\n", lm$total))
-  cat(sprintf("MC   : %.0f (P≥2445: %.1f%%)\n",
-              mc$mean, mc$prob_target * 100))
+  cat(sprintf("MC Mean   : %.0f\n", mc$mean))
+  cat(sprintf("MC Median : %.0f\n", mc$median))
+  cat(sprintf("MC Range  : %.0f – %.0f\n", mc$p10, mc$p90))
 
   list(arima=arima, lm=lm, mc=mc)
 }
